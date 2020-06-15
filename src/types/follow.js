@@ -4,20 +4,22 @@ let latest = {
     'msg': ''
 }
 
+export class follow {
 // Initiate the follower alerts
-exports.initiate = function(io, client) {
-    client.on('.follow', (data) => {
-        // Check if tests are allowed
-        if (data.isTest && !config.settings.showTests) {
-            return
-        }
+    initiate = function(config, io, client) {
+        client.on('.follow', (data) => {
+            // Check if tests are allowed
+            if (data.isTest && !config.settings.showTests) {
+                return
+            }
 
-        latest.msg = data.name
+            latest.msg = data.name
 
+            io.emit('update', latest)
+        })
+    }
+
+    update = function(io) {
         io.emit('update', latest)
-    })
-}
-
-exports.update = function(io) {
-    io.emit('update', latest)
+    }
 }

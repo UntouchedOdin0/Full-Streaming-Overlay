@@ -4,14 +4,15 @@
   "description": "A full streaming overlay for twitch",
   "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node src/main.js"
   },
+  "type": "module",
   "author": "Misha Bruinsma | Coocla33",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.16.3",
-    "socket.io": "^2.1.0",
-    "spotilocal": "^0.4.4",
-    "streamlabs-socket-client": "0.0.4"
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "node-fetch": "^2.6.0",
+    "socket.io": "^2.3.0"
   }
 }

@@ -5,38 +5,38 @@
         <link rel="stylesheet" href="./css/main.css">
     </head>
 
-    <body id="body">
+    <body>
+        <div id="app"></div>
     </body>
 
     <script src="/socket.io/socket.io.js"></script>
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script>
-
-        let socket = io()
+        let socket = io(),
+            $app = document.getElementById('app'),
+            typeElements = {};
 
         socket.on('update', (data) => {
-            console.log(data)
-            let msg = $('#' + data.type + '-msg')
-            let msg_text = $('#' + data.type + '-msg-text')
+            let $msg = typeElements[data.type].querySelector(`#${data.type}-msg`);
+            let $msgText = typeElements[data.type].querySelector(`#${data.type}-msg-text`);
 
-            let length = $('#length-msg')
-            let length_text = $('#length-msg-text')
+            let $length = typeElements['length'].querySelector('#length-msg');
+            let $lengthText = typeElements['length'].querySelector('#length-msg-text');
 
-            if (data.msg == '') {
+            if (data.msg === '' || data.msg === null || data.msg === undefined) {
                 data.msg = data.language.empty[data.type]
             }
 
-            msg_text.addClass('up')
+            $msgText.classList.add('up')
             setTimeout(() => {
-                length_text.html(data.msg)
-                msg.css('width', msg.width())
-                msg.css('width', length.width())
+                $lengthText.innerText = data.msg;
+                // $msg.style.width = msg.offsetWidth;
+                $msg.style.width = $length.offsetWidth;
                 setTimeout(() => {
-                    msg_text.html(data.msg)
-                    msg_text.removeClass('up')
-                    msg_text.addClass('down')
+                    $msgText.innerText = data.msg;
+                    $msgText.classList.remove('up')
+                    $msgText.classList.remove('down')
                     setTimeout(() => {
-                        msg_text.removeClass('down')
+                        $msgText.classList.remove('down')
                     }, 500);
                 }, 1000);
             }, 500)
@@ -45,43 +45,90 @@
         // Setup sequence
         socket.on('setup', (data) => {
             // Setup text color
-            $('#body').css('color', data.config.overlay.textColor)
+            $app.style.color = data.config.overlay.textColor;
 
             data.config.types.forEach((type) => {
-                
-                if (type == 'donation' && data.config.settings.enableTopDonation) {
-                    $("#body").append(
-                        "<div id='topDonation'>" +
-                        "  <div id='topDonation-parameter' class='special inline box' style='background: " + data.config.overlay.backgroundColor + "'>" +
-                        "      <span style='overflow: hidden'><p id='topDonation-parameter-text' class='parameter'>" + data.language.labels.topDonation + "</p></span>" +
-                        "  </div>" +
-                        "  <div id='topDonation-msg' class='special inline box msgBox' style='background: " + data.config.overlay.backgroundColor + "'>" +
-                        "      <span style='overflow: hidden'><p id='topDonation-msg-text' class='msg'>" + data.language.empty.topDonation + "</p></span>" +
-                        "  </div>" +
-                        "</div>"
-                    )
+                if (typeElements[type] !== undefined) {
+                    return;
                 }
 
-                $("#body").append(
-                    "<div id='" + type + "'>" +
-                    "  <div id='" + type + "-parameter' class='special inline box' style='background: " + data.config.overlay.backgroundColor + "'>" +
-                    "      <span style='overflow: hidden'><p id='" + type + "-parameter-text' class='parameter'>" + data.language.labels[type] + "</p></span>" +
-                    "  </div>" +
-                    "  <div id='" + type + "-msg' class='special inline box msgBox' style='background: " + data.config.overlay.backgroundColor + "'>" +
-                    "      <span style='overflow: hidden'><p id='" + type + "-msg-text' class='msg'>" + data.language.empty[type] + "</p></span>" +
-                    "  </div>" +
-                    "</div>"
-                )
+                let $typeElement = typeElements[type] = getTypeElement(type, data)
+
+                if (type === 'donation' && data.config.settings.enableTopDonation) {
+                    $app.insertAdjacentElement('beforeend', getTypeElement('topDonation', data))
+                }
+
+                $app.insertAdjacentElement('beforeend', $typeElement);
+
             })
 
-            $("#body").append(
-                "<div id='length'>" +
-                "  <div id='length-msg' class='special inline box msgBox' style='color: black'>" +
-                "      <span style='overflow: hidden'><p id='length-msg-text' class='msg'>Test123</p></span>" +
-                "  </div>" +
-                "</div>"
-            )
+            if (typeElements['length'] === undefined) {
+                let $lengthElement = typeElements['length'] = document.createElement('div');
+                $lengthElement.id = 'length';
+                
+                let $lengthMsgElement = document.createElement('div')
+                $lengthMsgElement.id = 'length-msg';
+                $lengthMsgElement.className = 'special inline box msgBox';
+                $lengthMsgElement.style.color = 'black';;
+
+                let $lengthMsgSpan = document.createElement('span');
+                $lengthMsgSpan.style.overflow = 'hidden';
+
+                let $lengthMsgP = document.createElement('p');
+                $lengthMsgP.id = 'length-msg-text';
+                $lengthMsgP.className = 'msg';
+                $lengthMsgP.innerText = 'placehold';
+
+                $lengthMsgSpan.insertAdjacentElement('beforeend', $lengthMsgP)
+                $lengthMsgElement.insertAdjacentElement('beforeend', $lengthMsgSpan)
+                $lengthElement.insertAdjacentElement('beforeend', $lengthMsgElement)
+
+                $app.insertAdjacentElement('beforeend', $lengthElement);
+            }
         })
+
+        function getTypeElement(type, data)
+        {
+            let $containerElement = document.createElement('div')
+                $containerElement.id = type;
+                
+            let $parameterElement = document.createElement('id');
+            $parameterElement.id = type.concat('-parameter');
+            $parameterElement.className = 'special inline box';
+            $parameterElement.style.background = data.config.overlay.backgroundColor;
+
+            let $parameterTextElement = document.createElement('span');
+            $parameterTextElement.style.overflow = 'hidden';
+        
+            let $parameterTextElementP = document.createElement('p');
+            $parameterTextElementP.id = type.concat('-parameter-text');
+            $parameterTextElementP.className = 'parameter';
+            $parameterTextElementP.innerText = data.language.labels[type];
+
+            let $messageElement = document.createElement('div');
+            $messageElement.id = type.concat('-msg');
+            $messageElement.className = 'special inline box msgBox';
+            $messageElement.style.background = data.config.overlay.backgroundColor;
+
+            let $messageTextElement = document.createElement('span');
+            $messageTextElement.style.overflow = 'hidden';
+
+            let $messageTextElementP = document.createElement('p');
+            $messageTextElementP.id = type.concat('-msg-text');
+            $messageTextElementP.className = 'msg';
+            $messageTextElementP.innerText = data.language.empty[type];
+
+            $messageTextElement.insertAdjacentElement('beforeend', $messageTextElementP)
+            $messageElement.insertAdjacentElement('beforeend', $messageTextElement)
+
+            $parameterTextElement.insertAdjacentElement('beforeend', $parameterTextElementP)
+            $parameterElement.insertAdjacentElement('beforeend', $parameterTextElement)
+
+            $containerElement.insertAdjacentElement('beforeend', $parameterElement)
+            $containerElement.insertAdjacentElement('beforeend', $messageElement)
+
+            return $containerElement;
+        }
 
     </script>
 </html>

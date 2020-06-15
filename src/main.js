@@ -1,35 +1,37 @@
+import dotenv from 'dotenv';
+import express from 'express';
+import {Server} from 'http';
+import SocketIO from 'socket.io';
+import io from 'socket.io-client';
+import config from './config.js';
+import languages from './languages.js';
+import types from './types.js';
+
+dotenv.config();
+
 // Required Stuff
-const express = require('express')
 const app = express()
 
-app.use(express.static('public'))
+app.use(express.static('./src/public'))
 
-const http = require('http').Server(app)
-global.io = require('socket.io')(http)
-global.config = require('./config.json')
-global.language = require('./language/' + config.settings.language + '.json')
-const apikey = require('./apikey.json')
+const httpServer = Server(app)
+const socketServer = SocketIO(httpServer)
 
-const streamlabsSocketClient = require('streamlabs-socket-client')
-global.client = new streamlabsSocketClient({
-    'token': apikey.key,
-    'emitTests': config.settings.showTests
-})
+const language = languages[config.settings.language];
 
-const types = {}
+let initialised = {};
+
+let client = io(`https://sockets.streamlabs.com?token=${process.env.STREAMLABS_SOCKET_TOKEN}`);
 
 // Start the server
-http.listen(config.settings.port, function() {
+httpServer.listen(config.settings.port, function() {
     console.log('[SERVER] Listening on *:' + config.settings.port)
 })
 
-// Start streamlabsSocketClient
-client.connect()
-
 // Make the events work
-client.client.on('event', e => {
+client.on('event', e => {
     // Log the event data for testing
-    console.log(JSON.stringify(e, 0, 4))
+    // console.log(JSON.stringify(e, 0, 4))
 
     // Check if there even is a message
     if (e.message) {
@@ -41,31 +43,21 @@ client.client.on('event', e => {
         // Validate the message
         e.message.validated = true
 
-        // Random names for testing
-        if (config.settings.randomNamesOnTests && e.message.isTest) {
-            e.message.name = config.names[Math.floor(Math.random() * config.names.length)]
-        }
-
-        // Random Months for testing subscriptions
-        if (config.settings.randomMonthsOnTests && e.message.isTest && e.type == 'subscription') {
-            e.message.months = Math.floor(Math.random() * 12) + 1
-        }
-
         // Emit the event to the client
         client.emit('.' + e.type, e.message)
     }
 })
 
-// Setting up the alerts
-config.types.forEach((type) => {
-    types[type] = require('./types/' + type + '.js')
-    types[type].initiate(io, client)
-})
-
 // Setting up the overlay
-io.on('connection', (socket) => {
+socketServer.on('connection', (socket) => {
     console.log('[SERVER] New Connection! (' + socket.request.connection.remoteAddress + ')')
 
     // Send necessery data to the overlay and wait for a response
-    socket.emit('setup', {'config': config, 'language': language})
+    socket.emit('setup', {config, language})
+})
+
+// Setting up the alerts
+config.types.forEach((type) => {
+    initialised[type] = new types[type];
+    initialised[type].initiate(config, io, client)
 })

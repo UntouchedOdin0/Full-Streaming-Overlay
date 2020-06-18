@@ -33,6 +33,7 @@ You need to store the Streamlabs access token and socket token in the .env file.
 
 ### Starting
 1. `npm start`
+1. If not done already, authenticate spotify using link provided in terminal
 
 ## Using the overlay
 Add a browser source to your streaming client with the url `http://localhost:PORT/side` - replacing PORT with your port. The default is `8080`.

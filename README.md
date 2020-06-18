@@ -1,6 +1,13 @@
 # Full Streaming Overlay
 A streaming overlay fully made using only code.
 
+# Todo:
+- Rename it from Full Streaming Overlay - I feel it is not a relevant name
+- Make the sign in process easier
+- Add token refreshing
+- Retrieve latest values on startup
+- Basic Settings page?
+
 
 ## Getting Started
 These instructions will help you installing the overlay!
@@ -9,38 +16,31 @@ These instructions will help you installing the overlay!
 You will need the following programs and software setup to get the overlay to work.
 
 ```
-Node.JS
-https://streamlabs.com/dashboard#/apisettings API KEY
+NodeJS v14.4.0
+NPM 6.14.5
 ```
+
+#### Spotify Developer Application
+You need to register for a Spotify application and store the client ID and client secret in the .env file. You can get those from [here](https://developer.spotify.com/dashboard/applications).
+
+#### Streamlabs
+You need to store the Streamlabs access token and socket token in the .env file. You can get those from [here](https://streamlabs.com/dashboard#/settings/api-settings).
 
 ### Installing
-Installing is as easy as painting a square on a wall.
 
-```
-Download the repositry.
-Run npm init
-Put your API KEY inside the apikey.json file located at "/src/apikey.json"
-Done!
-```
+1. Install the dependencies `npm i`
+1. Modify the config to your liking
 
 ### Starting
-You can start the program within the src folder with this command.
-```
-node main.js
-```
+1. `npm start`
 
 ## Using the overlay
-How to actually use the overlay and some examples.
-
-### OBS
-To use the overlay in OBS follow the following steps.
-```
- Make a new "Browser Source"
- Use the following URL: localhost:3000/side
-```
+Add a browser source to your streaming client with the url `http://localhost:PORT/side` - replacing PORT with your port. The default is `8080`.
 
 ### A Neat Gif
 ![Neat Gif](https://image.ibb.co/epeP1c/wadwd_made_dis.gif)
 
 ## Contribution
 * VirtualPhilipp (German Translation/Testing)
+
+## Forked from: https://github.com/Coocla33/Full-Streaming-Overlay

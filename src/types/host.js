@@ -1,29 +1,26 @@
+import { baseType } from "./baseType.js"
+
 // Static objects
 let latest = {
     'type': 'host',
     'msg': ''
 }
 
-export class host {
-    // Initiate the host alerts
-    initiate = function(config, io, client) {
-        client.on('.host', (data) => {
-            // Check if tests are allowed
-            if (data.isTest && !config.settings.showTests) {
-                return
-            }
+export class host extends baseType {
+    update = function (event, io) {
+        let config = this.config;
 
-            if (config.settings.showHostAmount) {
-                latest.msg = data.name + '<span class="special seetrough"> - ' + data.viewers + (data.viewers == 1 ? (" " + language.types.viewer) : (" " + language.types.viewers)) + '</span>'
-            } else {
-                latest.msg = data.name
-            }
+        // Check if tests are allowed
+        if (event.isTest && !config.settings.showTests) {
+            return
+        }
 
-            io.emit('update', latest)
-        })
-    }
+        if (config.settings.showHostAmount) {
+            latest.msg = event.name + '<span class="special seetrough"> - ' + (event.viewers || event.raiders) + ((event.viewers === 1 || event.raiders === 1) ? (" " + config.language.types.viewer) : (" " + config.language.types.viewers)) + '</span>'
+        } else {
+            latest.msg = event.name
+        }
 
-    update = function (io) {
         io.emit('update', latest)
     }
 }

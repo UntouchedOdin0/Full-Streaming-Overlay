@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <title>Overlay Test</title>
-        <link rel="stylesheet" href="./css/main.css">
+        <link rel="stylesheet" href="css/main.css">
     </head>
 
     <body>
@@ -12,10 +12,14 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
         let socket = io(),
+            config,
             $app = document.getElementById('app'),
             typeElements = {};
 
-        socket.on('update', (data) => {
+        socket.on('update', update)
+
+        function update(data)
+        {
             let $msg = typeElements[data.type].querySelector(`#${data.type}-msg`);
             let $msgText = typeElements[data.type].querySelector(`#${data.type}-msg-text`);
 
@@ -23,27 +27,32 @@
             let $lengthText = typeElements['length'].querySelector('#length-msg-text');
 
             if (data.msg === '' || data.msg === null || data.msg === undefined) {
-                data.msg = data.language.empty[data.type]
+                data.msg = null
+            }
+
+            if (data.msg !== null) {
+                typeElements[data.type].style.display = null;
             }
 
             $msgText.classList.add('up')
             setTimeout(() => {
-                $lengthText.innerText = data.msg;
-                // $msg.style.width = msg.offsetWidth;
-                $msg.style.width = $length.offsetWidth;
+                $lengthText.innerHTML = data.msg;
+                $msg.style.width = $length.offsetWidth + 'px';
                 setTimeout(() => {
-                    $msgText.innerText = data.msg;
+                    $msgText.innerHTML = data.msg;
                     $msgText.classList.remove('up')
-                    $msgText.classList.remove('down')
+                    $msgText.classList.add('down')
                     setTimeout(() => {
                         $msgText.classList.remove('down')
                     }, 500);
                 }, 1000);
             }, 500)
-        })
+        }
 
         // Setup sequence
         socket.on('setup', (data) => {
+            config = data.config;
+
             // Setup text color
             $app.style.color = data.config.overlay.textColor;
 
@@ -55,21 +64,21 @@
                 let $typeElement = typeElements[type] = getTypeElement(type, data)
 
                 if (type === 'donation' && data.config.settings.enableTopDonation) {
-                    $app.insertAdjacentElement('beforeend', getTypeElement('topDonation', data))
+                    typeElements['topDonation'] = getTypeElement('topDonation', data);
+                    $app.insertAdjacentElement('beforeend', typeElements['topDonation'])
                 }
 
                 $app.insertAdjacentElement('beforeend', $typeElement);
-
             })
 
             if (typeElements['length'] === undefined) {
                 let $lengthElement = typeElements['length'] = document.createElement('div');
                 $lengthElement.id = 'length';
-                
+
                 let $lengthMsgElement = document.createElement('div')
                 $lengthMsgElement.id = 'length-msg';
                 $lengthMsgElement.className = 'special inline box msgBox';
-                $lengthMsgElement.style.color = 'black';;
+                $lengthMsgElement.style.color = 'black';
 
                 let $lengthMsgSpan = document.createElement('span');
                 $lengthMsgSpan.style.overflow = 'hidden';
@@ -85,12 +94,53 @@
 
                 $app.insertAdjacentElement('beforeend', $lengthElement);
             }
+
+            if (data.config.spotify.token !== undefined) {
+                initSpotify(data.config.spotify)
+            }
         })
+
+        socket.on('setup.spotify', (data) => {
+            config.spotify.token = data;
+            initSpotify(data);
+        })
+
+        async function initSpotify() {
+            setSong()
+        }
+
+        let lastSong;
+        async function setSong()
+        {
+            let player = await fetch('https://api.spotify.com/v1/me/player', {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + config.spotify.token.access_token
+                }
+            }).then(request => request.json())
+
+            
+            let timeoutIn;
+            if (lastSong === `${player.item.artists[0].name} - ${player.item.name}`) {
+                timeoutIn = 500;
+            } else {
+                update({
+                    type: 'song',
+                    msg: `${player.item.artists[0].name} - ${player.item.name}`
+                })
+
+                timeoutIn = player.item.duration_ms - player.progress_ms;
+            }
+
+            console.log('Checking next song in: %s', timeoutIn)
+            setTimeout(setSong, timeoutIn)
+        }
 
         function getTypeElement(type, data)
         {
             let $containerElement = document.createElement('div')
-                $containerElement.id = type;
+            $containerElement.id = type;
+            $containerElement.style.display = 'none';    
                 
             let $parameterElement = document.createElement('id');
             $parameterElement.id = type.concat('-parameter');
@@ -109,6 +159,7 @@
             $messageElement.id = type.concat('-msg');
             $messageElement.className = 'special inline box msgBox';
             $messageElement.style.background = data.config.overlay.backgroundColor;
+            $messageElement.style.width = '0px';
 
             let $messageTextElement = document.createElement('span');
             $messageTextElement.style.overflow = 'hidden';
@@ -116,7 +167,7 @@
             let $messageTextElementP = document.createElement('p');
             $messageTextElementP.id = type.concat('-msg-text');
             $messageTextElementP.className = 'msg';
-            $messageTextElementP.innerText = data.language.empty[type];
+            $messageTextElementP.innerText = null;
 
             $messageTextElement.insertAdjacentElement('beforeend', $messageTextElementP)
             $messageElement.insertAdjacentElement('beforeend', $messageTextElement)

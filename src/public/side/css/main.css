@@ -3,7 +3,7 @@
 body {
     margin: 0;
     font-family: 'Roboto', sans-serif;
-    background-color: antiquewhite
+    background-color: transparent;
 }
 
 p {
@@ -21,7 +21,6 @@ p {
 }
 
 .special.box.msgBox {
-    margin-left: -4px;
     transition: all 1s;
     white-space: nowrap;
 }

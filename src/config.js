@@ -12,7 +12,8 @@ const config = {
         "showSubMonths": true,
         "showHostAmount": true,
         "showSongArtist": true,
-        "songCheckingSpeed": 250
+        "songCheckingSpeed": 250,
+        "hideByDefault": true
     },
     "overlay": {
         "backgroundColor": "rgba(0, 0, 0, 0.5)",
@@ -21,10 +22,16 @@ const config = {
     "types": [
         "song",
         "donation",
-        "sub",
+        "bits",
+        "subscription",
         "host",
-        "follow"
-    ]
+        "follow",
+    ],
+    "spotify": {
+        "scopes": [
+            "user-read-playback-state"
+        ]
+    }
 };
 
 export default config;

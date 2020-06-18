@@ -1,25 +1,22 @@
+import { baseType } from "./baseType.js"
+
 // Static Objects
 let latest = {
     'type': 'follow',
     'msg': ''
 }
 
-export class follow {
-// Initiate the follower alerts
-    initiate = function(config, io, client) {
-        client.on('.follow', (data) => {
-            // Check if tests are allowed
-            if (data.isTest && !config.settings.showTests) {
-                return
-            }
+export class follow extends baseType {
+    update = function(event, io) {
+        let config = this.config;
 
-            latest.msg = data.name
+        // Check if tests are allowed
+        if (event.isTest && !config.settings.showTests) {
+            return
+        }
 
-            io.emit('update', latest)
-        })
-    }
+        latest.msg = event.name
 
-    update = function(io) {
         io.emit('update', latest)
     }
 }

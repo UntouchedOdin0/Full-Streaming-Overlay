@@ -4,8 +4,9 @@ export default {
         "topDonation": "Top Donations",
         "follow": "Latest Follow",
         "song": "Current Song",
-        "sub": "Latest Subscriber",
-        "host": "Latest Host"
+        "subscription": "Latest Subscriber",
+        "host": "Latest Host", 
+        "bits": "Latest bits"
     },
     "empty": {
         "donation": "No Donations",
@@ -13,7 +14,8 @@ export default {
         "follow": "No Follows",
         "host": "No Hosts",
         "song": "No Song Playing",
-        "sub": "No Subscribers"
+        "subscription": "No Subscribers",
+        "bits": "No bits"
     },
     "types": {
         "month": "Month",

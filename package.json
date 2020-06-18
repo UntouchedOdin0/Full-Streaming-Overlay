@@ -10,8 +10,10 @@
   "author": "Misha Bruinsma | Coocla33",
   "license": "ISC",
   "dependencies": {
+    "btoa": "^1.2.1",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "form-data": "^3.0.0",
     "node-fetch": "^2.6.0",
     "socket.io": "^2.3.0"
   }

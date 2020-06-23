@@ -7,7 +7,11 @@ let latest = {
 }
 
 export class follow extends baseType {
-    update = function(event, io) {
+    typeName = 'follow'
+
+    update (event, io) {
+        super.update(event, io)
+
         let config = this.config;
 
         // Check if tests are allowed

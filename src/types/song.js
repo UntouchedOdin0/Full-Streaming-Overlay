@@ -7,7 +7,11 @@ let latest = {
 }
 
 export class song extends baseType {
-    update = function(event, io) {
+    typeName = 'song'
+
+    update (event, io) {
+        super.update(event, io)
+
         io.emit('update', latest)
     }
 }

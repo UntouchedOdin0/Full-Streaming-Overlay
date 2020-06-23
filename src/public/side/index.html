@@ -20,6 +20,10 @@
 
         function update(data)
         {
+            if (typeElements[data.type] === undefined) {
+                return;
+            }
+
             let $msg = typeElements[data.type].querySelector(`#${data.type}-msg`);
             let $msgText = typeElements[data.type].querySelector(`#${data.type}-msg-text`);
 
@@ -95,6 +99,8 @@
                 $app.insertAdjacentElement('beforeend', $lengthElement);
             }
 
+            socket.emit('ready')
+
             if (data.config.spotify.token !== undefined) {
                 initSpotify(data.config.spotify)
             }
@@ -119,17 +125,17 @@
                 }
             }).then(request => request.json())
 
-            
-            let timeoutIn;
-            if (lastSong === `${player.item.artists[0].name} - ${player.item.name}`) {
-                timeoutIn = 500;
-            } else {
+            // temporarily force 5s timeout
+            let timeoutIn = config.settings.songCheckingSpeed;
+
+            let songName = `${config.settings.showSongArtist ? player.item.artists[0].name+' - ' : ''}${player.item.name}`;
+            if (lastSong !== songName) {
                 update({
                     type: 'song',
-                    msg: `${player.item.artists[0].name} - ${player.item.name}`
+                    msg: songName
                 })
 
-                timeoutIn = player.item.duration_ms - player.progress_ms;
+                lastSong = songName
             }
 
             console.log('Checking next song in: %s', timeoutIn)
@@ -140,7 +146,10 @@
         {
             let $containerElement = document.createElement('div')
             $containerElement.id = type;
-            $containerElement.style.display = 'none';    
+            
+            if (data.config.settings.hideIfEmpty === true) {
+                $containerElement.style.display = 'none';    
+            }
                 
             let $parameterElement = document.createElement('id');
             $parameterElement.id = type.concat('-parameter');
@@ -159,7 +168,10 @@
             $messageElement.id = type.concat('-msg');
             $messageElement.className = 'special inline box msgBox';
             $messageElement.style.background = data.config.overlay.backgroundColor;
-            $messageElement.style.width = '0px';
+
+            if (data.config.settings.hideIfEmpty === true) {
+                $messageElement.style.width = '0px';
+            }
 
             let $messageTextElement = document.createElement('span');
             $messageTextElement.style.overflow = 'hidden';
@@ -167,7 +179,13 @@
             let $messageTextElementP = document.createElement('p');
             $messageTextElementP.id = type.concat('-msg-text');
             $messageTextElementP.className = 'msg';
-            $messageTextElementP.innerText = null;
+
+            
+            if (data.config.settings.hideIfEmpty === true) {
+                $messageTextElementP.innerText = null;
+            } else {
+                $messageTextElementP.innerText = data.config.language.empty[type];
+            }
 
             $messageTextElement.insertAdjacentElement('beforeend', $messageTextElementP)
             $messageElement.insertAdjacentElement('beforeend', $messageTextElement)

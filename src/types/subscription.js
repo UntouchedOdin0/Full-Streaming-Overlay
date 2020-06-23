@@ -6,9 +6,12 @@ let latest = {
     'msg': ''
 }
 
-
 export class subscription extends baseType {
-    update = function(event, io) {
+    typeName = 'subscription'
+
+    update (event, io) {
+        super.update(event, io)
+
         let config = this.config;
         
         // Check if tests are allowed

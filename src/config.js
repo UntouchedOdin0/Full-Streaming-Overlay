@@ -1,9 +1,6 @@
 const config = {
     "debug": true,
     "settings": {
-        "showTests": true,
-        "randomNamesOnTests": true,
-        "randomMonthsOnTests": true,
         "port": 8080,
         "language": "english",
         "enableTopDonation": true,
@@ -12,8 +9,8 @@ const config = {
         "showSubMonths": true,
         "showHostAmount": true,
         "showSongArtist": true,
-        "songCheckingSpeed": 250,
-        "hideByDefault": true
+        "songCheckingSpeed": 5000,
+        "hideIfEmpty": false
     },
     "overlay": {
         "backgroundColor": "rgba(0, 0, 0, 0.5)",
@@ -22,7 +19,6 @@ const config = {
     "types": [
         "song",
         "donation",
-        "bits",
         "subscription",
         "host",
         "follow",
